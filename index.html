@@ -1,35 +1,77 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>フィギュア完全一致検索</title><style>
-*{box-sizing:border-box}body{margin:0;background:#f4f5f7;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main{max-width:720px;margin:auto;padding:18px 15px 40px}.card{background:#fff;border-radius:18px;padding:16px;margin:13px 0;box-shadow:0 3px 18px #0000000d}
-h1{font-size:24px;margin:8px 0}.sub,.hint{color:#666;line-height:1.6}.btn{width:100%;border:0;border-radius:14px;padding:16px;font-weight:700;font-size:16px;cursor:pointer}
-.pick,.go{background:#111;color:#fff}.camera{margin-top:10px;background:#e9e9ed}.go{margin-top:14px}.go:disabled{opacity:.35}
-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}#wrap,#loading,#error,#result{display:none}#wrap{margin-top:14px}
-#preview{width:100%;max-height:420px;object-fit:contain;background:#eee;border-radius:13px}.grid{display:grid;grid-template-columns:105px 1fr;gap:9px 10px;margin-top:12px}
-.k{color:#777}.v{font-weight:600;word-break:break-word}.badge{padding:5px 9px;border-radius:999px;background:#eee;font-size:13px}
-.box{padding:12px;border-radius:11px;margin-top:12px;line-height:1.55}.warn{background:#fff4d6}.err{background:#fdecec;color:#a20e0e}
-.spin{display:inline-block;width:18px;height:18px;border:2px solid #ccc;border-top-color:#111;border-radius:50%;animation:s 1s linear infinite;vertical-align:-4px;margin-right:8px}@keyframes s{to{transform:rotate(360deg)}}
-</style></head><body><main>
-<h1>📦 フィギュア完全一致検索</h1><p class="sub">写真を入れるだけ。限定版・Ver.違いまで確認します。</p>
-<section class="card">
-<button class="btn pick" id="pick">🖼️ 写真ライブラリから選択</button><input id="photo" type="file" accept="image/*">
-<button class="btn camera" id="cam">📷 カメラで撮影</button><input id="camera" type="file" accept="image/*" capture="environment">
-<div id="wrap"><img id="preview"><p class="hint" id="filename"></p></div>
-<button class="btn go" id="go" disabled>🔍 商品を特定</button>
-<div id="loading" class="box warn"><span class="spin"></span>写真を解析しています…</div><div id="error" class="box err"></div>
-</section>
-<section class="card" id="result"><b>解析結果</b> <span class="badge" id="confidence"></span>
-<div class="grid"><div class="k">作品</div><div class="v" id="franchise">—</div><div class="k">キャラ</div><div class="v" id="character">—</div>
-<div class="k">商品名</div><div class="v" id="product">—</div><div class="k">メーカー</div><div class="v" id="maker">—</div>
-<div class="k">Ver.</div><div class="v" id="version">—</div><div class="k">限定区分</div><div class="v" id="limited">—</div>
-<div class="k">確認文字</div><div class="v" id="visible">—</div></div><div id="caution" class="box warn"></div></section>
-<section class="card hint"><b>完全一致ルール</b><br>商品名・メーカー・Ver.・限定区分・外観を別々に確認。読めない情報は推測で確定しません。</section>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>フィギュア完全一致検索</title>
+<style>
+:root{--bg:#f6f3fb;--card:#fff;--ink:#201a2b;--muted:#766d82;--accent:#6d3cc7;--accent2:#8d5ee5;--line:#e5dff0}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;background:linear-gradient(180deg,#f1ebfb,#faf9fc);color:var(--ink)}
+.wrap{max-width:760px;margin:auto;padding:22px 16px 40px}.hero{text-align:center;padding:18px 0 16px}.hero h1{margin:0;font-size:clamp(25px,6vw,40px)}.hero p{color:var(--muted);margin:10px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 10px 30px rgba(60,35,90,.07)}
+label{font-weight:800;display:block;margin-bottom:8px}textarea{width:100%;min-height:110px;resize:vertical;border:2px solid var(--line);border-radius:14px;padding:14px;font-size:16px;outline:none}
+textarea:focus{border-color:var(--accent2)}.hint{font-size:13px;color:var(--muted);margin:8px 2px 15px}
+button,.btn{border:0;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;text-align:center;display:block}
+.primary{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.results{display:none;margin-top:18px}.results h2{font-size:19px;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.btn{background:#f5f1fb;color:var(--ink);border:1px solid var(--line)}.btn strong{display:block}.btn small{display:block;color:var(--muted);margin-top:3px;font-weight:600}
+.exact{margin-top:14px;background:#fff8dd;border:1px solid #eedb8c;border-radius:14px;padding:12px;font-size:13px;line-height:1.6}
+.query{margin-top:12px;padding:11px;background:#f8f7fa;border-radius:12px;color:#5d5568;font-size:13px;word-break:break-word}
+.clear{margin-top:10px;background:transparent;color:var(--muted);width:100%}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.wrap{padding:14px 12px 30px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>🔎 フィギュア完全一致検索</h1>
+    <p>商品名を入力して、画像・公式・販売サイトを一発検索</p>
+  </div>
+
+  <div class="card">
+    <label for="q">商品名</label>
+    <textarea id="q" placeholder="例：初音ミク Wonderland フィギュア 白雪姫 タイクレ限定"></textarea>
+    <div class="hint">限定版・カラー・Ver.・メーカー名まで分かる場合は入れるほど絞り込みやすくなります。</div>
+    <button class="primary" id="search">🔍 検索先を表示</button>
+
+    <div class="results" id="results">
+      <h2>検索するサイト</h2>
+      <div class="grid">
+        <a class="btn" id="google" target="_blank" rel="noopener"><strong>🖼 Google画像</strong><small>まず画像で外観を確認</small></a>
+        <a class="btn" id="bing" target="_blank" rel="noopener"><strong>🖼 Bing画像</strong><small>別エンジンでも照合</small></a>
+        <a class="btn" id="googleWeb" target="_blank" rel="noopener"><strong>🌐 Google検索</strong><small>公式・商品ページを探す</small></a>
+        <a class="btn" id="official" target="_blank" rel="noopener"><strong>🏢 公式情報を探す</strong><small>商品名＋公式で検索</small></a>
+        <a class="btn" id="suruga" target="_blank" rel="noopener"><strong>🏪 駿河屋を探す</strong><small>商品ページ候補</small></a>
+        <a class="btn" id="amiami" target="_blank" rel="noopener"><strong>🏪 あみあみを探す</strong><small>商品情報候補</small></a>
+        <a class="btn" id="mercari" target="_blank" rel="noopener"><strong>🛍 メルカリ検索</strong><small>出品例を確認</small></a>
+        <a class="btn" id="yahoo" target="_blank" rel="noopener"><strong>🛍 Yahoo!検索</strong><small>流通画像も確認</small></a>
+      </div>
+      <div class="query" id="queryView"></div>
+      <div class="exact">⚠️ 「完全一致」は検索結果を自動判定する意味ではありません。限定版・カラー・表情・Ver.・メーカーまで一致しているか、開いたページで確認してください。似た通常版を代用しないのが安全です。</div>
+      <button class="clear" id="clear">入力をクリア</button>
+    </div>
+  </div>
+</div>
 <script>
-let file=null;const $=x=>document.getElementById(x);$('pick').onclick=()=>$('photo').click();$('cam').onclick=()=>$('camera').click();
-function load(i){const f=i.files&&i.files[0];if(!f)return;file=f;const r=new FileReader();r.onload=e=>{$('preview').src=e.target.result;$('wrap').style.display='block';$('filename').textContent='選択済み: '+f.name;$('go').disabled=false};r.readAsDataURL(f)}
-$('photo').onchange=()=>load($('photo'));$('camera').onchange=()=>load($('camera'));
-$('go').onclick=async()=>{if(!file)return;$('loading').style.display='block';$('error').style.display='none';$('result').style.display='none';$('go').disabled=true;
-try{const fd=new FormData();fd.append('image',file);const r=await fetch('/api/analyze',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error||'解析失敗');
-const v=x=>x??'不明';$('franchise').textContent=v(d.franchise);$('character').textContent=v(d.character);$('product').textContent=v(d.product_name);$('maker').textContent=v(d.manufacturer);$('version').textContent=v(d.version);$('limited').textContent=v(d.limited_edition);$('visible').textContent=Array.isArray(d.visible_text)?d.visible_text.join(' / '):v(d.visible_text);$('confidence').textContent='確信度 '+v(d.confidence);$('caution').textContent=d.caution||'Web照合前の解析候補です。';$('result').style.display='block'}catch(e){$('error').textContent=e.message;$('error').style.display='block'}finally{$('loading').style.display='none';$('go').disabled=false}};
-</script></main></body></html>
+const $=id=>document.getElementById(id);
+function g(q){return "https://www.google.com/search?q="+encodeURIComponent(q)}
+function setLinks(q){
+ $("google").href="https://www.google.com/search?tbm=isch&q="+encodeURIComponent(q);
+ $("bing").href="https://www.bing.com/images/search?q="+encodeURIComponent(q);
+ $("googleWeb").href=g(q);
+ $("official").href=g(q+" 公式");
+ $("suruga").href=g("site:suruga-ya.jp "+q);
+ $("amiami").href=g("site:amiami.jp "+q);
+ $("mercari").href="https://jp.mercari.com/search?keyword="+encodeURIComponent(q);
+ $("yahoo").href="https://search.yahoo.co.jp/search?p="+encodeURIComponent(q);
+ $("queryView").textContent="検索語： "+q;
+ $("results").style.display="block";
+ localStorage.setItem("figureQuery",q);
+}
+$("search").onclick=()=>{const q=$("q").value.trim();if(!q){alert("商品名を入力してください");return}setLinks(q)};
+$("q").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")$("search").click()});
+$("clear").onclick=()=>{$("q").value="";$("results").style.display="none";localStorage.removeItem("figureQuery");$("q").focus()};
+const saved=localStorage.getItem("figureQuery");if(saved){$("q").value=saved;setLinks(saved)}
+</script>
+</body>
+</html>

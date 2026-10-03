@@ -1,7 +1,7 @@
 {
-  "name":"figure-exact-match",
-  "version":"0.3.0",
-  "type":"module",
-  "scripts":{"start":"node server.js"},
-  "dependencies":{"express":"^5.1.0","multer":"^2.0.2","openai":"^6.0.0"}
+  "name": "figure-search-free",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {"start": "node server.js"},
+  "dependencies": {"express": "^4.21.2"}
 }
