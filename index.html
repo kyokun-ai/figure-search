@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>フィギュア完全一致検索</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f4f5f7;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:720px;margin:auto;padding:18px 15px 40px}.card{background:#fff;border-radius:18px;padding:16px;margin:13px 0;box-shadow:0 3px 18px #0000000d}
+h1{font-size:24px;margin:8px 0}.sub,.hint{color:#666;line-height:1.6}.btn{width:100%;border:0;border-radius:14px;padding:16px;font-weight:700;font-size:16px;cursor:pointer}
+.pick,.go{background:#111;color:#fff}.camera{margin-top:10px;background:#e9e9ed}.go{margin-top:14px}.go:disabled{opacity:.35}
+input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}#wrap,#loading,#error,#result{display:none}#wrap{margin-top:14px}
+#preview{width:100%;max-height:420px;object-fit:contain;background:#eee;border-radius:13px}.grid{display:grid;grid-template-columns:105px 1fr;gap:9px 10px;margin-top:12px}
+.k{color:#777}.v{font-weight:600;word-break:break-word}.badge{padding:5px 9px;border-radius:999px;background:#eee;font-size:13px}
+.box{padding:12px;border-radius:11px;margin-top:12px;line-height:1.55}.warn{background:#fff4d6}.err{background:#fdecec;color:#a20e0e}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid #ccc;border-top-color:#111;border-radius:50%;animation:s 1s linear infinite;vertical-align:-4px;margin-right:8px}@keyframes s{to{transform:rotate(360deg)}}
+</style></head><body><main>
+<h1>📦 フィギュア完全一致検索</h1><p class="sub">写真を入れるだけ。限定版・Ver.違いまで確認します。</p>
+<section class="card">
+<button class="btn pick" id="pick">🖼️ 写真ライブラリから選択</button><input id="photo" type="file" accept="image/*">
+<button class="btn camera" id="cam">📷 カメラで撮影</button><input id="camera" type="file" accept="image/*" capture="environment">
+<div id="wrap"><img id="preview"><p class="hint" id="filename"></p></div>
+<button class="btn go" id="go" disabled>🔍 商品を特定</button>
+<div id="loading" class="box warn"><span class="spin"></span>写真を解析しています…</div><div id="error" class="box err"></div>
+</section>
+<section class="card" id="result"><b>解析結果</b> <span class="badge" id="confidence"></span>
+<div class="grid"><div class="k">作品</div><div class="v" id="franchise">—</div><div class="k">キャラ</div><div class="v" id="character">—</div>
+<div class="k">商品名</div><div class="v" id="product">—</div><div class="k">メーカー</div><div class="v" id="maker">—</div>
+<div class="k">Ver.</div><div class="v" id="version">—</div><div class="k">限定区分</div><div class="v" id="limited">—</div>
+<div class="k">確認文字</div><div class="v" id="visible">—</div></div><div id="caution" class="box warn"></div></section>
+<section class="card hint"><b>完全一致ルール</b><br>商品名・メーカー・Ver.・限定区分・外観を別々に確認。読めない情報は推測で確定しません。</section>
+<script>
+let file=null;const $=x=>document.getElementById(x);$('pick').onclick=()=>$('photo').click();$('cam').onclick=()=>$('camera').click();
+function load(i){const f=i.files&&i.files[0];if(!f)return;file=f;const r=new FileReader();r.onload=e=>{$('preview').src=e.target.result;$('wrap').style.display='block';$('filename').textContent='選択済み: '+f.name;$('go').disabled=false};r.readAsDataURL(f)}
+$('photo').onchange=()=>load($('photo'));$('camera').onchange=()=>load($('camera'));
+$('go').onclick=async()=>{if(!file)return;$('loading').style.display='block';$('error').style.display='none';$('result').style.display='none';$('go').disabled=true;
+try{const fd=new FormData();fd.append('image',file);const r=await fetch('/api/analyze',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error||'解析失敗');
+const v=x=>x??'不明';$('franchise').textContent=v(d.franchise);$('character').textContent=v(d.character);$('product').textContent=v(d.product_name);$('maker').textContent=v(d.manufacturer);$('version').textContent=v(d.version);$('limited').textContent=v(d.limited_edition);$('visible').textContent=Array.isArray(d.visible_text)?d.visible_text.join(' / '):v(d.visible_text);$('confidence').textContent='確信度 '+v(d.confidence);$('caution').textContent=d.caution||'Web照合前の解析候補です。';$('result').style.display='block'}catch(e){$('error').textContent=e.message;$('error').style.display='block'}finally{$('loading').style.display='none';$('go').disabled=false}};
+</script></main></body></html>
