@@ -1,8 +1,1 @@
-const express = require("express");
-const path = require("path");
-const app = express();
-const port = process.env.PORT || 10000;
-app.use(express.static(__dirname));
-app.get("/api/health", (req,res)=>res.json({ok:true, mode:"free-ocr"}));
-app.get("*", (req,res)=>res.sendFile(path.join(__dirname,"index.html")));
-app.listen(port, "0.0.0.0", ()=>console.log(`figure-search free OCR running on ${port}`));
+const express=require("express");const path=require("path");const app=express();const port=process.env.PORT||10000;app.use(express.static(__dirname));app.get("/api/health",(req,res)=>res.json({ok:true,mode:"free-ocr-v1.2"}));app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));app.listen(port,"0.0.0.0",()=>console.log("figure-search OCR v1.2 on "+port));
