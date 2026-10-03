@@ -3,71 +3,51 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,#f1eaff,#fff);color:#1d1930}
-.wrap{max-width:920px;margin:auto;padding:24px 16px 60px}.title{text-align:center;font-size:clamp(28px,6vw,48px);font-weight:850;margin:0}.sub{text-align:center;color:#756889}
-.card{background:#fff;border-radius:24px;padding:22px;box-shadow:0 8px 30px #5f3dc41a}.ocr{border:2px dashed #cbb9ed;border-radius:18px;padding:16px;background:#faf7ff;margin-bottom:20px}
-h2{margin:0 0 8px}label{font-weight:800;font-size:20px}textarea{width:100%;min-height:115px;margin-top:10px;padding:16px;border:2px solid #e3daf2;border-radius:18px;font-size:18px}
-input[type=file]{width:100%;margin:10px 0}.btn{width:100%;border:0;border-radius:16px;padding:16px;font-weight:800;font-size:17px;cursor:pointer;background:linear-gradient(90deg,#6e35d5,#8a57e7);color:#fff}
-.btn.secondary{background:#eee8f8;color:#392665}.btn:disabled{opacity:.55}#preview{display:none;max-width:100%;max-height:360px;margin:10px auto;border-radius:14px}
-.status{margin:10px 0;min-height:28px;color:#65557b;font-weight:650}.note{font-size:14px;color:#776b86;margin:10px 2px 18px}
-.sites{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.site{display:block;text-align:center;padding:17px 8px;border:1px solid #e2d8ef;border-radius:16px;background:#f8f5fc;text-decoration:none;color:#211a31;font-weight:800}.site small{display:block;color:#796b87;font-weight:500;margin-top:4px}
-details{margin-top:10px;color:#6c5b7c}pre{white-space:pre-wrap;background:#fff;padding:10px;border-radius:10px;font-size:12px;max-height:180px;overflow:auto}
-@media(max-width:620px){.sites{grid-template-columns:1fr}.card{padding:16px}}
-</style></head><body><div class="wrap">
-<h1 class="title">🔎 フィギュア完全一致検索</h1><p class="sub">無料OCR 強化版 v1.2</p>
-<div class="card"><div class="ocr"><h2>📷 写真から商品名を読み取る</h2>
-<div>商品名・限定表記が見える箱／袋／タグの写真を選択。</div>
-<input id="photo" type="file" accept="image/*"><img id="preview"><button id="ocrBtn" class="btn secondary" disabled>📖 強化OCRで読み取る</button>
-<div id="status" class="status"></div><details><summary>OCRで拾った全文を見る</summary><pre id="raw"></pre></details></div>
-<label>商品名</label><textarea id="q" placeholder="読み取り結果がここに入ります。修正もできます。"></textarea>
-<div class="note">v1.2では画像を自動拡大・グレースケール化・コントラスト強調し、上部/全体を複数回OCRして結果を統合します。画像そのものから商品をAI判定する機能ではありません。</div>
-<button id="searchBtn" class="btn">🔍 検索先を表示</button><div id="sites" class="sites"></div></div></div>
-<canvas id="work" style="display:none"></canvas>
+.wrap{max-width:920px;margin:auto;padding:22px 14px 60px}.title{text-align:center;font-size:clamp(28px,6vw,46px);margin:0;font-weight:850}.sub{text-align:center;color:#756889}
+.card{background:#fff;border-radius:24px;padding:20px;box-shadow:0 8px 30px #5f3dc41a}.box{border:2px dashed #cbb9ed;border-radius:18px;padding:15px;background:#faf7ff;margin-bottom:20px}
+.btn{width:100%;border:0;border-radius:16px;padding:15px;font-weight:800;font-size:17px;background:linear-gradient(90deg,#6e35d5,#8a57e7);color:#fff;cursor:pointer}.btn.alt{background:#eee8f8;color:#392665}.btn:disabled{opacity:.5}
+input[type=file]{width:100%;margin:10px 0}.stage{position:relative;margin:12px auto;max-width:100%;touch-action:none;user-select:none;display:none}.stage img{display:block;max-width:100%;max-height:560px;margin:auto}
+#sel{position:absolute;border:3px solid #7c3aed;background:#7c3aed22;display:none;pointer-events:none}
+.status{min-height:28px;margin:10px 0;color:#65557b;font-weight:650}label{font-size:20px;font-weight:800}textarea{width:100%;min-height:115px;margin-top:9px;padding:15px;border:2px solid #e3daf2;border-radius:18px;font-size:18px}
+.note{font-size:14px;color:#776b86;margin:10px 0 18px}.sites{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.site{display:block;text-align:center;padding:16px;border:1px solid #e2d8ef;border-radius:16px;background:#f8f5fc;text-decoration:none;color:#211a31;font-weight:800}.site small{display:block;color:#796b87;font-weight:500}
+@media(max-width:620px){.sites{grid-template-columns:1fr}.card{padding:14px}}
+</style></head><body><div class="wrap"><h1 class="title">🔎 フィギュア完全一致検索</h1><p class="sub">無料OCR トリミング版 v1.3</p>
+<div class="card"><div class="box"><h2>📷 商品名の部分だけ囲んで読む</h2>
+<div>写真を選択 → 商品名が書かれた範囲を指/マウスで囲む → OCR。</div>
+<input id="photo" type="file" accept="image/*">
+<div id="stage" class="stage"><img id="preview"><div id="sel"></div></div>
+<button id="ocr" class="btn alt" disabled>📖 選択範囲をOCR</button><div id="status" class="status"></div></div>
+<label>商品名</label><textarea id="q" placeholder="OCR結果がここに入ります"></textarea>
+<div class="note">紫の四角で商品名・限定表記だけを囲んでください。選択しない場合は写真全体を読みます。OpenAI APIは使用しません。</div>
+<button id="search" class="btn">🔍 検索先を表示</button><div id="sites" class="sites"></div></div></div>
+<canvas id="cv" hidden></canvas>
 <script>
-const $=id=>document.getElementById(id),photo=$('photo'),preview=$('preview'),btn=$('ocrBtn'),statusEl=$('status'),q=$('q'),rawEl=$('raw'),sites=$('sites'),canvas=$('work');
-let url=null;
-photo.onchange=()=>{let f=photo.files[0];if(!f)return;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(f);preview.src=url;preview.style.display='block';btn.disabled=false;statusEl.textContent='写真を選択しました。'};
-
-function loadImage(file){return new Promise((res,rej)=>{const im=new Image;im.onload=()=>res(im);im.onerror=rej;im.src=URL.createObjectURL(file)})}
-function processedCanvas(img,cropTop=0,cropHeight=1,threshold=false){
- const sx=0,sy=Math.floor(img.height*cropTop),sw=img.width,sh=Math.floor(img.height*cropHeight);
- const maxW=1800,scale=Math.max(1,Math.min(3,maxW/sw));canvas.width=Math.round(sw*scale);canvas.height=Math.round(sh*scale);
- const c=canvas.getContext('2d');c.drawImage(img,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
- let d=c.getImageData(0,0,canvas.width,canvas.height),a=d.data;
- for(let i=0;i<a.length;i+=4){let g=.299*a[i]+.587*a[i+1]+.114*a[i+2];g=(g-128)*1.65+128;if(threshold)g=g>158?255:0;g=Math.max(0,Math.min(255,g));a[i]=a[i+1]=a[i+2]=g}
- c.putImageData(d,0,0); const copy=document.createElement('canvas');copy.width=canvas.width;copy.height=canvas.height;copy.getContext('2d').drawImage(canvas,0,0);return copy;
+const $=x=>document.getElementById(x),photo=$('photo'),stage=$('stage'),img=$('preview'),sel=$('sel'),ocr=$('ocr'),st=$('status'),q=$('q'),cv=$('cv'),sites=$('sites');
+let file=null,drag=false,start=null,rect=null,objURL=null;
+photo.onchange=()=>{file=photo.files[0];if(!file)return;if(objURL)URL.revokeObjectURL(objURL);objURL=URL.createObjectURL(file);img.src=objURL;stage.style.display='block';ocr.disabled=false;rect=null;sel.style.display='none';st.textContent='商品名の部分を紫の四角で囲んでください。'};
+function pos(e){const r=stage.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return{x:Math.max(0,Math.min(r.width,p.clientX-r.left)),y:Math.max(0,Math.min(r.height,p.clientY-r.top))}}
+function begin(e){e.preventDefault();drag=true;start=pos(e);rect=null;sel.style.display='block'}
+function move(e){if(!drag)return;e.preventDefault();let p=pos(e),x=Math.min(start.x,p.x),y=Math.min(start.y,p.y),w=Math.abs(p.x-start.x),h=Math.abs(p.y-start.y);rect={x,y,w,h};Object.assign(sel.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'})}
+function end(){drag=false}
+stage.addEventListener('pointerdown',begin);stage.addEventListener('pointermove',move);stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
+function makeCrop(){
+ const ir=img.getBoundingClientRect(),sr=stage.getBoundingClientRect(),offX=ir.left-sr.left,offY=ir.top-sr.top;
+ let x=0,y=0,w=img.clientWidth,h=img.clientHeight;
+ if(rect&&rect.w>12&&rect.h>12){x=Math.max(0,rect.x-offX);y=Math.max(0,rect.y-offY);w=Math.min(rect.w,img.clientWidth-x);h=Math.min(rect.h,img.clientHeight-y)}
+ const sx=x*img.naturalWidth/img.clientWidth,sy=y*img.naturalHeight/img.clientHeight,sw=w*img.naturalWidth/img.clientWidth,sh=h*img.naturalHeight/img.clientHeight;
+ const scale=Math.max(2,Math.min(5,2200/sw));cv.width=Math.round(sw*scale);cv.height=Math.round(sh*scale);let c=cv.getContext('2d');c.drawImage(img,sx,sy,sw,sh,0,0,cv.width,cv.height);
+ let d=c.getImageData(0,0,cv.width,cv.height),a=d.data;for(let i=0;i<a.length;i+=4){let g=.299*a[i]+.587*a[i+1]+.114*a[i+2];g=Math.max(0,Math.min(255,(g-128)*1.8+128));a[i]=a[i+1]=a[i+2]=g}c.putImageData(d,0,0);return cv;
 }
-function scoreLine(s){
- let n=0;if(/初音|ミク|miku/i.test(s))n+=6;if(/wonderland/i.test(s))n+=6;if(/白雪|雪姫/i.test(s))n+=6;if(/フィギュア|figure/i.test(s))n+=4;
- if(/限定|オンライン|クレーン|タイトー|taito/i.test(s))n+=5;if(/ver\.?|version/i.test(s))n+=2;
- if(/注意|対象年齢|ご使用|事故|電話|材質|警告|保護者|パッケージ|http|tel/i.test(s))n-=5;return n;
+function clean(t){
+ let ls=t.split(/\n+/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
+ ls=ls.filter(s=>!/注意|対象年齢|ご使用|事故|電話|TEL|http|www|材質|お客様相談|ウェブサイト|MADE IN|PRIZE ONLY/i.test(s));
+ return ls.join(' ').replace(/\s+/g,' ').trim();
 }
-function clean(all){
- let lines=all.split(/\n+/).map(x=>x.replace(/\s+/g,' ').trim()).filter(x=>x.length>1);
- let ranked=lines.map(x=>[x,scoreLine(x)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
- let chosen=[];for(const [x] of ranked){if(!chosen.some(y=>y.toLowerCase()===x.toLowerCase()))chosen.push(x)}
- return chosen.slice(0,8).join(' ').replace(/\s+/g,' ').trim();
-}
-async function recognize(worker,img,label){
- statusEl.textContent='文字を読み取り中… '+label;
- const r=await worker.recognize(img);return r.data.text||'';
-}
-btn.onclick=async()=>{if(!photo.files[0])return;btn.disabled=true;rawEl.textContent='';q.value='';try{
- statusEl.textContent='OCRエンジン準備中…';const img=await loadImage(photo.files[0]);
- const worker=await Tesseract.createWorker(['jpn','eng'],1,{logger:m=>{if(m.status==='recognizing text')statusEl.textContent='文字を読み取り中… '+Math.round((m.progress||0)*100)+'%'}});
- await worker.setParameters({preserve_interword_spaces:'1'});
- let texts=[];
- texts.push(await recognize(worker,processedCanvas(img,0,0.62,false),'① 上部強調'));
- texts.push(await recognize(worker,processedCanvas(img,0,0.62,true),'② 上部二値化'));
- texts.push(await recognize(worker,processedCanvas(img,0,1,false),'③ 全体強調'));
- await worker.terminate();
- const all=texts.join('\n');rawEl.textContent=all;let result=clean(all);
- q.value=result;localStorage.setItem('figureQuery',result);
- statusEl.textContent=result?'✅ 強化OCR完了。商品名を確認してください。':'⚠️ 商品名候補を抽出できませんでした。下の「OCR全文」を確認してください。';
- }catch(e){console.error(e);statusEl.textContent='⚠️ OCR処理に失敗しました。';}finally{btn.disabled=false}};
-function add(label,desc,u){let a=document.createElement('a');a.className='site';a.target='_blank';a.rel='noopener';a.href=u;a.innerHTML=label+'<small>'+desc+'</small>';sites.appendChild(a)}
-$('searchBtn').onclick=()=>{let s=q.value.trim();if(!s)return alert('商品名を入力してください');let e=encodeURIComponent(s);sites.innerHTML='';
-add('🖼 Google画像','外観を確認','https://www.google.com/search?tbm=isch&q='+e);add('🖼 Bing画像','別エンジンで照合','https://www.bing.com/images/search?q='+e);
-add('🌐 Google検索','商品ページを探す','https://www.google.com/search?q='+e);add('🏢 公式情報','商品名＋公式','https://www.google.com/search?q='+encodeURIComponent(s+' 公式'));
-add('🏬 駿河屋','商品候補','https://www.google.com/search?q='+encodeURIComponent('site:suruga-ya.jp '+s));add('🐈 メルカリ','出品検索','https://jp.mercari.com/search?keyword='+e);
-sites.scrollIntoView({behavior:'smooth'})};q.value=localStorage.getItem('figureQuery')||'';
+ocr.onclick=async()=>{if(!file)return;ocr.disabled=true;st.textContent='OCR準備中…';try{
+ let crop=makeCrop();let worker=await Tesseract.createWorker(['jpn','eng'],1,{logger:m=>{if(m.status==='recognizing text')st.textContent='読み取り中… '+Math.round((m.progress||0)*100)+'%'}});
+ await worker.setParameters({preserve_interword_spaces:'1'});let r=await worker.recognize(crop);await worker.terminate();let s=clean(r.data.text||'');q.value=s;localStorage.setItem('figureQuery',s);st.textContent=s?'✅ 読み取り完了。内容を確認してください。':'⚠️ 読み取れませんでした。範囲を少し広げて再試行してください。';
+ }catch(e){console.error(e);st.textContent='⚠️ OCRに失敗しました。';}finally{ocr.disabled=false}};
+function add(n,d,u){let a=document.createElement('a');a.className='site';a.target='_blank';a.rel='noopener';a.href=u;a.innerHTML=n+'<small>'+d+'</small>';sites.appendChild(a)}
+$('search').onclick=()=>{let s=q.value.trim();if(!s)return alert('商品名を入力してください');let e=encodeURIComponent(s);sites.innerHTML='';add('🖼 Google画像','外観を確認','https://www.google.com/search?tbm=isch&q='+e);add('🖼 Bing画像','別エンジンで照合','https://www.bing.com/images/search?q='+e);add('🌐 Google検索','商品ページ','https://www.google.com/search?q='+e);add('🏢 公式情報','商品名＋公式','https://www.google.com/search?q='+encodeURIComponent(s+' 公式'));add('🏬 駿河屋','商品候補','https://www.google.com/search?q='+encodeURIComponent('site:suruga-ya.jp '+s));add('🐈 メルカリ','出品検索','https://jp.mercari.com/search?keyword='+e);sites.scrollIntoView({behavior:'smooth'})};
+q.value=localStorage.getItem('figureQuery')||'';
 </script></body></html>
