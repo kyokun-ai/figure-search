@@ -1,17 +1,18 @@
-FIGURE SEARCH FREE v1
+figure-search FREE OCR v1.1
 
-無料版:
-- 写真AI判定を廃止
-- OpenAI API不要
-- 商品名を自分で入力
-- Google画像 / Bing画像 / Google検索 / 公式候補 / 駿河屋 / あみあみ / メルカリ / Yahoo! を一発検索
-- Render Freeでそのまま公開可能
-- 静的HTMLとして使う場合は index.html 単体でも動作
+追加機能:
+- 写真を選択
+- Tesseract.js（ブラウザ内OCR）で日本語＋英語を読み取り
+- 商品名らしい文字を商品名欄へ自動入力
+- 手動修正後、各検索サイトへ検索
+- OpenAI APIは使用しません
 
-Render:
-Build Command: npm install
-Start Command: npm start
+注意:
+- OCR処理自体の従量AI API料金はありません。
+- Tesseract.jsと言語データはCDNからブラウザへ読み込まれます。
+- 写真だけからキャラクター/商品を画像認識する機能ではありません。
+- OCR精度は写真の角度、反射、文字サイズなどに左右されます。
 
-重要:
-この版は検索結果の「完全一致」をAIで自動判定しません。
-限定版・カラー・Ver.等は検索先で目視確認してください。
+GitHub:
+index.html / package.json / server.js / README.txt を既存figure-searchへ上書きアップロードしてください。
+RenderのAuto-Deployが有効なら自動更新されます。

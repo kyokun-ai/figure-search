@@ -1,8 +1,8 @@
 const express = require("express");
 const path = require("path");
 const app = express();
+const port = process.env.PORT || 10000;
 app.use(express.static(__dirname));
-app.get("/api/health", (req,res)=>res.json({ok:true,service:"figure-search-free",version:"1.0"}));
+app.get("/api/health", (req,res)=>res.json({ok:true, mode:"free-ocr"}));
 app.get("*", (req,res)=>res.sendFile(path.join(__dirname,"index.html")));
-const port = process.env.PORT || 3000;
-app.listen(port, ()=>console.log(`figure-search-free running on ${port}`));
+app.listen(port, "0.0.0.0", ()=>console.log(`figure-search free OCR running on ${port}`));
